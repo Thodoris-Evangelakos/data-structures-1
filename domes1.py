@@ -31,14 +31,14 @@ class LinkedList:
     def printList(self):
         print("~~~~Printing the entire linked list~~~~")
         while self.head is not None:
-            print("(", self.head.data_x,",", self.head.data_y,")")
+            print("(%d,%d)" %(self.head.data_x,self.head.data_y))
             self.head = self.head.next
         self.head = self.firstHead #pointer reset
 
 #search function that goes through each node, comparing the x and y values
 
     def search(self, user_x, user_y):
-        print("Searching for","(",user_x,",",user_y,")")
+        print("Searching for (%d,%d)" %(user_x ,user_y,))
         searches = 0
         found = 0
         while self.head is not None:
@@ -52,7 +52,7 @@ class LinkedList:
             print("Found!")
         else:
             print("Not found :(")
-        print("Total searches:", searches+1)
+        print("Total searches: %d" %(searches+1))
             
 
 l = LinkedList()
@@ -63,4 +63,4 @@ l.search(10,42)
 print("~~searching for random int~~")
 l.search(randint(0,100),randint(0,100))
 l.printList()
-print("Linked list size:",l.count)
+print("Linked list size: %d" %(l.count))
