@@ -1,5 +1,16 @@
+# -*- coding: cp1253 -*-
+
+
 from random import seed
 from random import randint
+import numpy as np
+
+
+#Ν=2^18, Μ=500
+M = 10
+N = 101
+
+
 seed(0)
 class Node:
     def __init__(self, data_x, data_y):
@@ -54,6 +65,30 @@ class LinkedList:
             print("Not found :(")
         print("Total searches: %d" %(searches+1))
             
+
+class HashTable():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.hashtable = np.array([None]*N)
+        for x in range(N):
+            self.hashtable[x] = LinkedList()
+
+    def getHash(x, y):
+        H = (x*N + y)%M
+        print("H(%d,%d) = %d" %(x, y ,H))
+        return H
+
+    def insertKey(self, x, y):
+        index = self.getHash(x, y)
+        self.hashtable[index].append(x, y)
+
+    def searchKey(self, x, y):
+        index = self.getHash(x, y)
+        boolean = self.hashtable[index]
+        return boolean
+    
+
 
 l = LinkedList()
 l.append(5,12)
