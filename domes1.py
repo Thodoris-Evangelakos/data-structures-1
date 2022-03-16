@@ -1,3 +1,6 @@
+from random import seed
+from random import randint
+seed(0)
 class Node:
     def __init__(self, data_x, data_y):
         self.data_x = data_x
@@ -57,6 +60,7 @@ l.append(5,12)
 l.append(10,42)
 l.append(19,28)
 l.search(10,42)
+print("~~searching for random int~~")
+l.search(randint(0,100),randint(0,100))
 l.printList()
 print("Linked list size:",l.count)
- 
