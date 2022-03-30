@@ -1,4 +1,4 @@
-##stable 0.1
+##stable 0.2
 ##NEAR DEPLOYABLE
 ##molis prosthetw ena zeugos, koitaw to teleutaio disk page tou arxeiou, an
 from random import seed
@@ -16,8 +16,6 @@ myFilename = 'tucBinaryFinal.bin'
 
 M = 500
 N = 2**18
-Buffer = []
-tempBuffer = []
 
 def fileIsEmpty():
     if (os.path.getsize(myFilename) == 0):
@@ -151,23 +149,22 @@ def writeBytes(file, bytes, position):
 #    HT.insertKey(x, y)
 
 def hasSpace(lastDiskPage):
+    has_space = False
     with open(myFilename, 'rb') as file:
         bytes = readBytes(file, page(lastDiskPage))
         intArray = toIntArray(bytes)
-    for i in range(0,63):
+    for i in range(64):
         if (intArray[i] == 2**19):
-            return True
-        else:
-            return False
+            has_space = True
+            break
+    return has_space
 
 def lastIndex(lastDiskPage):
     with open(myFilename, 'rb') as file:
-        bytes = readBytes(file, lastDiskPage*256)
+        bytes = readBytes(file, page(lastDiskPage))
         intArray = toIntArray(bytes)
-        for i in range(0,63):
+        for i in range(64):
             if (intArray[i] == 2**19):
-                return i
-            else:
                 return i
 
 class Lista:
@@ -179,37 +176,31 @@ class Lista:
         if fileIsEmpty(): #an head OR tail -1 einai adeio to list
             self.head = 0 #prepei na phgainei sto telos tou arxeiou, megethos arxeiou / 256
             self.tail = 0 #to idio me to panw
-            #skipped to 2)
             newBuffer = [2**19 for i in range(64)]
             newBuffer[0] = x
             newBuffer[1] = y
             bytes = toBytes(newBuffer)
             with open(myFilename, 'wb') as file:
-                writeBytes(file, bytes, self.tail)
-            newBuffer.clear()
+                writeBytes(file, bytes, page(self.tail))
         else:
             if (hasSpace(self.tail)):
                 newBuffer = []
-                #1)
-                ##fortwnw sto buffer o,ti yparxei sto diskage kai sto telos tou vazw ta x y mou
                 with open(myFilename, 'rb') as file:
                     bytes = readBytes(file, page(self.tail))
                     newBuffer = toIntArray(bytes)
                 newBuffer[lastIndex(self.tail)] = x
                 newBuffer[lastIndex(self.tail)+1] = y
-                with open(myFilename, 'wb') as file:
+                with open(myFilename, 'ab') as file:
                     bytes = toBytes(newBuffer)
                     writeBytes(file, bytes, page(self.tail))
-                #write back to disk
             else:
-                newBuffer = [2**19 for i in range(64)]
-                newBuffer.append(0)
-                newBuffer.append(1)
-                bytes = toBytes(newBuffer)
-                with open(myFilename, 'wb') as file:
-                    writeBytes(file, bytes, page(self.tail+1))
                 self.tail += 1
-                newBuffer.clear()
+                newBuffer = [2**19 for i in range(64)]
+                newBuffer[0] = x
+                newBuffer[1] = y
+                with open(myFilename, 'ab') as file:
+                    bytes = toBytes(newBuffer)
+                    writeBytes(file, bytes, page(self.tail))
 
 def main():
     with open(myFilename, 'r+') as file:
@@ -218,9 +209,10 @@ def main():
 
     l = LinkedList()
     print('~'*5,"Linked List",'~'*5)
-    #for i in range(1,32):
+    for nar in range(0,32):
+        listoula.add(nar+1, nar+1)
     listoula.add(1,1)
-    #listoula.add(1,1)
+    listoula.add(3,3)
     #for i in range (0,1000):
     #    c = random.randrange(0,2**18)
     #    d = random.randrange(0,2**18)
