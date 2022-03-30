@@ -1,4 +1,4 @@
-##beta 1.0
+##beta 1.1
 ##NEAR DEPLOYABLE
 ##molis prosthetw ena zeugos, koitaw to teleutaio disk page tou arxeiou, an
 from random import seed
@@ -109,14 +109,25 @@ class HashTable():
 
 def readBytes(file, position):
 	file.seek(position) 
-	byte_array = bytearray(file.read(256)) #ERWTHSH: to bytearray metatrepei kati se array apo bytes, alla afou kanoume read apo .bin prepei hdh na einai se bytes(?)
+	byte_array = bytearray(file.read(256))
 	return byte_array
+
+def readAllBytes(file, numOfPages):
+    file.seek(0)
+    byte_array = bytearray(file.read(numOfPages*256))
+    return byte_array
 
 def toIntArray(bytes):
 	result = [0 for i in range(64)] # total of 64 numbers
 	for i in range(0, 64):
 		result[i] = int.from_bytes(bytes[i*4:i*4+4], 'little')
 	return result
+
+def toIntArrayBig(bytes, numOfPages):
+    result = [0 for i in range ((numOfPages)*64)] #makes result as big as the "bytes" bytearray dictates
+    for i in range(0, numOfPages*64):
+        result[i] = int.from_bytes(bytes[i*4:i*4+4], 'little')
+    return result
 
 def toBytes(intArray):
 	result = array.array('B', range(0,256))
@@ -127,6 +138,16 @@ def toBytes(intArray):
 		result[i*4+2] = bytesOfInt[0+2]
 		result[i*4+3] = bytesOfInt[0+3]
 	return result
+
+def toBytesBig(intArray, numOfPages):
+    result = ['B', range(0,(256*numOfPages))]
+    for i in range(0,(256*numOfPages)):
+        bytesOfInt = intArray[i].to_bytes(4, byteorder='little')
+        result[i*4] = bytesOfInt[0]
+        result[i*4+1] = bytesOfInt[0+1]
+        result[i*4+2] = bytesOfInt[0+2]
+        result[i*4+3] = bytesOfInt[0+3]
+    return result
 
 def writeBytes(file, bytes, position):
 	file.seek(position)
@@ -184,15 +205,28 @@ class Lista:
                 writeBytes(file, bytes, page(self.tail))
         else:
             if (hasSpace(self.tail)):
-                newBuffer = []
-                with open(myFilename, 'rb') as file:
-                    bytes = readBytes(file, page(self.tail))
-                    newBuffer = toIntArray(bytes)
-                newBuffer[lastIndex(self.tail)] = x
-                newBuffer[lastIndex(self.tail)+1] = y
-                with open(myFilename, 'ab') as file:
-                    bytes = toBytes(newBuffer)
-                    writeBytes(file, bytes, page(self.tail))
+                if (self.tail == 0):
+                    newBuffer = []
+                    with open(myFilename, 'rb') as file:
+                        bytes = readBytes(file, page(self.tail))
+                        newBuffer = toIntArray(bytes)
+                    newBuffer[lastIndex(self.tail)] = x
+                    newBuffer[lastIndex(self.tail)+1] = y
+                    with open(myFilename, 'wb') as file:
+                        bytes = toBytes(newBuffer)
+                        writeBytes(file, bytes, page(self.tail))
+                else:
+                    superBuffer = []
+                    newBuffer = []
+                    with open(myFilename, 'rb') as file:
+                        bytes = readAllBytes(file, (self.tail+1))
+                        superBuffer = toIntArrayBig(bytes, self.tail+1)
+                    superBuffer[lastIndex(self.tail)] = x
+                    superBuffer[lastIndex(self.tail)+1] = y
+                    with open(myFilename, 'wb') as file:
+                        bytes = toBytesBig(superBuffer, self.tail+1)
+                        writeBytes(file, bytes, page(0))
+
             else:
                 self.tail += 1
                 newBuffer = [2**19 for i in range(64)]
