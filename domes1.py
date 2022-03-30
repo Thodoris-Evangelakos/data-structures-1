@@ -1,3 +1,4 @@
+##stable 0.1
 ##NEAR DEPLOYABLE
 ##molis prosthetw ena zeugos, koitaw to teleutaio disk page tou arxeiou, an
 from random import seed
@@ -6,6 +7,8 @@ import random
 import numpy as np
 import array
 import os
+
+##100 searches gia stoixeia pou einai mesa kai 100 gia stoixeia pou den einai
 
 comparisons = 0
 
@@ -178,14 +181,13 @@ class Lista:
             self.tail = 0 #to idio me to panw
             #skipped to 2)
             newBuffer = [2**19 for i in range(64)]
-            newBuffer[1] = x
-            newBuffer[2] = y
+            newBuffer[0] = x
+            newBuffer[1] = y
             bytes = toBytes(newBuffer)
             with open(myFilename, 'wb') as file:
                 writeBytes(file, bytes, self.tail)
             newBuffer.clear()
         else:
-            #print(self.tail) #TO_DELETE
             if (hasSpace(self.tail)):
                 newBuffer = []
                 #1)
@@ -216,11 +218,14 @@ def main():
 
     l = LinkedList()
     print('~'*5,"Linked List",'~'*5)
-    for i in range (0,1000):
-        c = random.randrange(0,2**18)
-        d = random.randrange(0,2**18)
-        l.append(c, d)
-        listoula.add(c, d)
+    #for i in range(1,32):
+    listoula.add(1,1)
+    #listoula.add(1,1)
+    #for i in range (0,1000):
+    #    c = random.randrange(0,2**18)
+    #    d = random.randrange(0,2**18)
+    #    l.append(c, d)
+    #    listoula.add(c, d)
     a = random.randrange(0,2**18)
     b = random.randrange(0,2**18)
     print("Searching for random pair (%d,%d) in the linked list..." %(a, b))
