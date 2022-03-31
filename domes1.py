@@ -14,7 +14,7 @@ myFilename = 'tucBinaryFinal.bin'
 
 M = 500
 N = 2**18
-K = 10**3
+K = 10**5
 
 def fileIsEmpty(): #checks if the file is empty by looking at the .bin's size
     if (os.path.getsize(myFilename) == 0):
@@ -177,7 +177,10 @@ class Lista: #class for the B1 question
             writeBytes(file, bytes, page(self.tail)) #sticks the new disk page after the last one. since we're in ab mode providing a position for the seek argument is unecessary but it's left there in memorium of the last implementation that ended up not working ~sigh~
 
 def main():
-    
+    print("")
+    print("--------------------------------------------------------------------------------")
+    print("")
+
     file = open(myFilename, 'w') #creates the file without risking errors
     file.close() #closes the file object
     with open(myFilename, 'r+') as file: #clears the file by setting its size to 0
