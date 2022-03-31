@@ -1,6 +1,5 @@
-##beta 1.0
-##NEAR DEPLOYABLE
-##molis prosthetw ena zeugos, koitaw to teleutaio disk page tou arxeiou, an
+##beta 2.0
+##seems functional, isn't
 from random import seed
 from random import randint
 import random
@@ -8,147 +7,108 @@ import numpy as np
 import array
 import os
 
-##100 searches gia stoixeia pou einai mesa kai 100 gia stoixeia pou den einai
-
 comparisons = 0
 
 myFilename = 'tucBinaryFinal.bin'
 
 M = 500
 N = 2**18
+K = 10**3
 
-def fileIsEmpty():
+def fileIsEmpty(): #checks if the file is empty by looking at the .bin's size
     if (os.path.getsize(myFilename) == 0):
         return True
     else:
         return False
 
-def page(n):
+def page(n): #more compact way to seek(), returns the number of pages multiplied by 256
     return (n)*256
 
-class Node:
+class Node: #node class storing the coordinates
     def __init__(self, data_x, data_y):
         self.data_x = data_x
         self.data_y = data_y
         self.next = None
 
 
-class LinkedList:
+class LinkedList: #linked list holding the head and the tail
     def __init__(self):
         self.head = None
         self.tail = None
 
-    def append(self, data_x, data_y):
-        node = Node(data_x, data_y)
+    def append(self, data_x, data_y): #appends the coordinates 
+        node = Node(data_x, data_y) #create a node with the coords
 
-        if not self.head:
+        if not self.head: #if the list is empty, create a node and consider it the head
             self.head = node
         else:
-            self.tail.next = node
-        self.tail = node
+            self.tail.next = node #add the new node after the tail
+        self.tail = node #added node becomes the tail
 
-    def printList(self):
-        temp = self.head
-        if not temp:
-            print(None)
-        while temp:
-            if temp.next:
-                print("(%d,%d)" %
-                      (self.head.data_x, self.head.data_y), "--->", end="  ")
-            else:
-                print("(%d,%d)" % (self.head.data_x, self.head.data_y))
-            temp = temp.next
-
-# search function that goes through each node, comparing the x and y values
+# search function that goes through each node, comparing the x and y values of the node with
+#the ones given by the user
 
     def search(self, user_x, user_y):
         global comparisons
         searches = 0
         found = 0
-        temp = self.head
+        temp = self.head #temp variable to help traverse the LL
         while temp is not None:
-            searches += 1
+            searches += 1 #1 comparison
             if temp.data_x == user_x and temp.data_y == user_y:
-                searches += 2
+                searches += 2 #2 comparisons, one for x and one for y
                 found = 1
                 break
-            searches += 2
+            searches += 2 #2 comparisons, one for x and one for y, either this or the one under the if statement fires
             temp = temp.next
-        comparisons += searches
-        print("Searches:",searches)
+        comparisons += searches #number of comparisons is added to the total
         return found
 
 
 class HashTable():
     def __init__(self):
-        self.hashtable = np.array([None]*N)
+        self.hashtable = np.array([None]*N) #HT is an N-sized array
         for x in range(M):
-            self.hashtable[x] = LinkedList()
+            self.hashtable[x] = LinkedList() #create a LL at every index of the HT
 
-    def getHash(self, x, y):
+    def getHash(self, x, y): #gets the has value of the (x,y) pair
         H = (x*N + y) % M
-        #print("H(%d,%d) = %d" %(x, y ,H))
         return H
 
-    def insertKey(self, x, y):
+    def insertKey(self, x, y): #inserts key by calling the linked list's append method to the index given by the hash
         index = self.getHash(x, y)
         self.hashtable[index].append(x, y)
 
     def searchNode(self, x, y):
-        index = self.getHash(x, y)
-        print("Index of (%d,%d): %d" % (x, y, self.getHash(x, y)))
-        print("Searching at given index...")
+        index = self.getHash(x, y) #looks for a key by calling the linked list's search method to the index given by the hash
         return self.hashtable[index].search(x, y)
 
-    def printHashTable(self):
-        print("Hash table is :- \n")
-        print("Index \t\tValues\n")
-        for x in range(M):
-            print(x, end="\t\t")
-            self.hashtable[x].printList()
-
-def readBytes(file, position):
-	file.seek(position) 
-	byte_array = bytearray(file.read(256)) #ERWTHSH: to bytearray metatrepei kati se array apo bytes, alla afou kanoume read apo .bin prepei hdh na einai se bytes(?)
+def readBytes(file, position): #reads 256 bytes (a disk page) at the given position 
+	file.seek(position)
+	byte_array = bytearray(file.read(256))
 	return byte_array
 
-def toIntArray(bytes):
+def toIntArray(bytes): #turns a bytearray into an integer list with calling Python's built-in methods to 4-byte-chunks of the bytearray
 	result = [0 for i in range(64)] # total of 64 numbers
 	for i in range(0, 64):
 		result[i] = int.from_bytes(bytes[i*4:i*4+4], 'little')
 	return result
 
-def toBytes(intArray):
+def toBytes(intArray): #turns an integer array into bytes
 	result = array.array('B', range(0,256))
 	for i in range(0, 64):
-		bytesOfInt = intArray[i].to_bytes(4, byteorder='little')
+		bytesOfInt = intArray[i].to_bytes(4, byteorder='little') #turns one of intArray's ints into 4 bytes, and assigns each byte to its respective place in the result array
 		result[i*4] = bytesOfInt[0]
 		result[i*4+1] = bytesOfInt[0+1]
 		result[i*4+2] = bytesOfInt[0+2]
 		result[i*4+3] = bytesOfInt[0+3]
 	return result
 
-def writeBytes(file, bytes, position):
+def writeBytes(file, bytes, position): #writes bytearray at given position
 	file.seek(position)
 	bytes = file.write(bytes)
 
-###EXP
-#def addToBuffer(x, y):
-#    if len(tempBuffer) < 64:
-#        tempBuffer.append(x)
-#        tempBuffer.append(y)
-#    else:
-#        bytes = toBytes(tempBuffer)
-#
-#def addToLL(ll, x, y):
-#    ll = LinkedList()
-#    ll.append(x, y)
-#
-#def addToHT(HT, x, y):
-#    HT = HashTable()
-#    HT.insertKey(x, y)
-
-def hasSpace(lastDiskPage):
+def hasSpace(lastDiskPage): #checks if the diskpage has any space left by looking for a 2**19 (number out of bounds for the RNG), if spotted, it returns True, else, returns false
     has_space = False
     with open(myFilename, 'rb') as file:
         bytes = readBytes(file, page(lastDiskPage))
@@ -159,7 +119,7 @@ def hasSpace(lastDiskPage):
             break
     return has_space
 
-def lastIndex(lastDiskPage):
+def lastIndex(lastDiskPage): #reads the last disk page, turns its contents into integers, enters them into an array, and then returns the first index with the value of 2**19 (same logic as above)
     with open(myFilename, 'rb') as file:
         bytes = readBytes(file, page(lastDiskPage))
         intArray = toIntArray(bytes)
@@ -167,72 +127,90 @@ def lastIndex(lastDiskPage):
             if (intArray[i] == 2**19):
                 return i
 
-class Lista:
-    def __init__(self):
+class Lista: #class for the B1 question
+
+    tucBuffer = [2**19 for i in range(64)]
+    
+    def __init__(self): #initializes tail and head with -1, meaning that it's empty
         self.head = -1
         self.tail = -1
+        self.searches = 0 #searches to print out total comparisons
+
+    def bufferSize(self):
+        for i in range(64):
+            if (self.tucBuffer[i] == 2**19):
+                return i
+        return 64
     
     def add(self, x, y):
-        if fileIsEmpty(): #an head OR tail -1 einai adeio to list
-            self.head = 0 #prepei na phgainei sto telos tou arxeiou, megethos arxeiou / 256
-            self.tail = 0 #to idio me to panw
-            newBuffer = [2**19 for i in range(64)]
-            newBuffer[0] = x
-            newBuffer[1] = y
-            bytes = toBytes(newBuffer)
-            with open(myFilename, 'wb') as file:
-                writeBytes(file, bytes, page(self.tail))
-        else:
-            if (hasSpace(self.tail)):
-                newBuffer = []
-                with open(myFilename, 'rb') as file:
-                    bytes = readBytes(file, page(self.tail))
-                    newBuffer = toIntArray(bytes)
-                newBuffer[lastIndex(self.tail)] = x
-                newBuffer[lastIndex(self.tail)+1] = y
-                with open(myFilename, 'ab') as file:
-                    bytes = toBytes(newBuffer)
-                    writeBytes(file, bytes, page(self.tail))
-            else:
-                self.tail += 1
-                newBuffer = [2**19 for i in range(64)]
-                newBuffer[0] = x
-                newBuffer[1] = y
-                with open(myFilename, 'ab') as file:
-                    bytes = toBytes(newBuffer)
-                    writeBytes(file, bytes, page(self.tail))
+        if (self.bufferSize() == 64): #when the buffer fills up
+            if (fileIsEmpty()):
+                self.head = 0
+            self.tail += 1
+            self.writeToDisk() #data is written to the disk
+            self.tucBuffer = [2**19 for i in range(64)] #the buffer is reset
+        self.tucBuffer[lastIndex(self.tail)] = x
+        self.tucBuffer[lastIndex(self.tail)] = y
+
+    def forceWrite(self):
+        self.writeToDisk() #data is written
+        self.tucBuffer = [2**19 for i in range(64)] #buffer is reset
+
+    def writeToDisk(self):
+        if (fileIsEmpty()):
+            self.head = 0
+            self.tail = 0
+        bytes = toBytes(self.tucBuffer)
+        with open(myFilename, 'wb') as file:
+            writeBytes(file, bytes, page(self.tail))
 
 def main():
-    with open(myFilename, 'r+') as file:
+    file = open(myFilename, 'w') #creates the file without risking errors
+    file.close()
+    with open(myFilename, 'r+') as file: #clears the file by setting its size to 0
         file.truncate(0)
     listoula = Lista()
+    listoula.forceWrite()
 
-    l = LinkedList()
     print('~'*5,"Linked List",'~'*5)
-    for nar in range(0,32):
-        listoula.add(nar+1, nar+1)
-    listoula.add(1,1)
-    listoula.add(3,3)
-    #for i in range (0,1000):
-    #    c = random.randrange(0,2**18)
-    #    d = random.randrange(0,2**18)
-    #    l.append(c, d)
-    #    listoula.add(c, d)
-    a = random.randrange(0,2**18)
-    b = random.randrange(0,2**18)
-    print("Searching for random pair (%d,%d) in the linked list..." %(a, b))
-    l.search(a, b)
-    print("Comparisons:", comparisons)
+    l = LinkedList()
+    elementsInTheLinkedList = [] #creating a list of all the elements in the LL
+    for i in range (0,K): #populating the LL and the disk with K random elements
+        c = random.randrange(0,N)
+        d = random.randrange(0,N)
+        l.append(c, d)
+        listoula.add(c, d)
+        elementsInTheLinkedList.append(c)
+        elementsInTheLinkedList.append(d)
+    listoula.forceWrite()
+    hundredRandomElementsInLL = []
+    for i in range(0,100): #searching for 100 random pairs from the LL
+        randomIndex = random.randrange(0, int(K/2))
+        hundredRandomElementsInLL.append(elementsInTheLinkedList[int(randomIndex*2)])
+        hundredRandomElementsInLL.append(elementsInTheLinkedList[int(randomIndex*2)+1])
+    for i in range(0,100):
+        l.search(hundredRandomElementsInLL[i*2], hundredRandomElementsInLL[(i*2)+1])
+        l.search(random.randrange(N,N+100), random.randrange(N,N+100))
+    print("LL comparisons:", comparisons)
 
     print('~'*5,"Hashtable",'~'*5)
     HT = HashTable()
-    for i in range (0,1000):
-        HT.insertKey(random.randrange(0,2**18), random.randrange(0,2**18))
-    a = random.randrange(0,2**18)
-    b = random.randrange(0,2**18)
-    print("Searching for random pair (%d,%d) in the hashtable..." %(a, b))
-    HT.searchNode(a, b)
-    print("Comparisons:", comparisons)
+    elementsInTheHashTable = []
+    for i in range (0,K): #populating the HT with K random elements
+        c = random.randrange(0,N) #picks 2 random integers
+        d = random.randrange(0,N)
+        HT.insertKey(c, d) #adds them to the hashtable
+        elementsInTheHashTable.append(c) #logs them in the respective list
+        elementsInTheHashTable.append(d)
+    hundredRandomElementsInHT = []
+    for i in range(0,100): #searching for 100 random pairs from the HT
+        randomIndex = random.randrange(0, int(K/2)) #picks an index, doubles it (meaning it's always an x), and adds it and its respective y to the list
+        hundredRandomElementsInHT.append(elementsInTheHashTable[int(randomIndex*2)]) #exact same logic is used in the linked list test searches
+        hundredRandomElementsInHT.append(elementsInTheHashTable[int(randomIndex*2)+1])
+    for i in range(0,100):
+        HT.searchNode(hundredRandomElementsInHT[i*2], hundredRandomElementsInHT[(i*2)+1])
+        HT.searchNode(random.randrange(N,N+100), random.randrange(N,N+100))
+    print("Total comparisons:", comparisons)
         
 
 if __name__ == "__main__":
