@@ -1,0 +1,86 @@
+MEAN K = 1000
+~~~~~ Linked List ~~~~~
+Comparisons for 100 successful LL searches (memory): 152355.0
+Disk entries for 100 successful LL searches (disk): 17963.66
+Comparisons for 100 failed LL searches (memory): 300000--
+Disk entries for 100 failed LL searches (disk): 52800--
+~~~~~ Hashtable ~~~~~
+Comparisons for 100 successful HT searches (memory): 1046.0
+Comparisons for 100 successful HT searches (disk): Null--
+Comparisons for 100 failed HT searches (memory): 9.0
+Comparisons for 100 failed HT searches (disk): Null--
+
+------------------------------------------------------------------------------~~
+
+MEAN K = 10,000
+
+~~~~~ Linked List ~~~~~
+Comparisons for 100 successful LL searches (memory): 1528458.0
+Disk entries for 100 successful LL searches (disk): 1665320.6
+Comparisons for 100 failed LL searches (memory): 3000000--
+Disk entries for 100 failed LL searches (disk): 4914100--
+~~~~~ Hashtable ~~~~~
+Comparisons for 100 successful HT searches (memory): 7574.0
+Comparisons for 100 successful HT searches (disk): Null--
+Comparisons for 100 failed HT searches (memory): 70
+Comparisons for 100 failed HT searches (disk): Null--
+
+------------------------------------------------------------------------------~~
+
+MEAN K = 30,000
+
+~~~~~ Linked List ~~~~~
+Comparisons for 100 successful LL searches (memory): 4640688.0
+Disk entries for 100 successful LL searches (disk): 15452479.0
+Comparisons for 100 failed LL searches (memory): 9000000--
+Disk entries for 100 failed LL searches (disk): 44039100--
+~~~~~ Hashtable ~~~~~
+Comparisons for 100 successful HT searches (memory): 22770.0
+Comparisons for 100 successful HT searches (disk): Null--
+Comparisons for 100 failed HT searches (memory): 160.0
+Comparisons for 100 failed HT searches (disk): Null--
+
+------------------------------------------------------------------------------~~
+
+MEAN K = 50,000
+
+~~~~~ Linked List ~~~~~
+Comparisons for 100 successful LL searches (memory): 7364272.0
+Disk entries for 100 successful LL searches (disk): 39423571.0
+Comparisons for 100 failed LL searches (memory): 15000000--
+Disk entries for 100 failed LL searches (disk): 122226600--
+~~~~~ Hashtable ~~~~~
+Comparisons for 100 successful HT searches (memory): 37387.0
+Comparisons for 100 successful HT searches (disk): Null--
+Comparisons for 100 failed HT searches (memory): 287.0
+Comparisons for 100 failed HT searches (disk): Null--
+
+------------------------------------------------------------------------------~~
+
+MEAN K = 70,000
+
+~~~~~ Linked List ~~~~~
+Comparisons for 100 successful LL searches (memory): 30368940
+Disk entries for 100 successful LL searches (disk): 74098494.33
+Comparisons for 100 failed LL searches (memory): 21000000--
+Disk entries for 100 failed LL searches (disk): 239476600--
+~~~~~ Hashtable ~~~~~
+Comparisons for 100 successful HT searches (memory): 52535.0
+Comparisons for 100 successful HT searches (disk): Null--
+Comparisons for 100 failed HT searches (memory): 396.0
+Comparisons for 100 failed HT searches (disk): Null--
+
+------------------------------------------------------------------------------~~
+
+MEAN K = 100,000
+
+~~~~~ Linked List ~~~~~
+Comparisons for 100 successful LL searches (memory): 14710420.0
+Disk entries for 100 successful LL searches (disk): 158375727.33
+Comparisons for 100 failed LL searches (memory): 30000000--
+Disk entries for 100 failed LL searches (disk): 488437500--
+~~~~~ Hashtable ~~~~~
+Comparisons for 100 successful HT searches (memory): 75666.0
+Comparisons for 100 successful HT searches (disk): Null--
+Comparisons for 100 failed HT searches (memory): 575.0
+Comparisons for 100 failed HT searches (disk): Null--
