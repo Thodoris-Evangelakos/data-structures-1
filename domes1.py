@@ -1,5 +1,5 @@
-##stable 1.1
-##pretty much deployable :)
+##stable 1.2
+##deployable :)
 from random import seed
 from random import randint
 import random
@@ -8,6 +8,7 @@ import array
 import os
 
 comparisons = 0
+diskComparisons = 0
 
 myFilename = 'tucBinaryFinal.bin'
 
@@ -136,79 +137,93 @@ class Lista: #class for the B1 question
         self.tail = -1
         self.searches = 0 #searches to print out total comparisons
 
-    def bufferSize(self):
-        for i in range(64):
+    def bufferSize(self): #return's tuc buffer's size
+        for i in range(64): #goes through the buffer looking for a 2**19, when it finds it, it returns the index
             if (self.tucBuffer[i] == 2**19):
                 return i
-        return 64
+        return 64 #if none of the 64 indices corresponds to a value of 2**19 that means that the buffer is full
     
-    def findValue(self, x, y):
-        for i in range(0,self.tail+1):
-            with open(myFilename, 'rb') as file:
+    def findValue(self, x, y): #scans the binary file for a set of values
+        global diskComparisons
+        for i in range(0,self.tail+1): #looks through every page, e.g. if a file has 3 disk pages, it will look through 0, 1 and 2
+            with open(myFilename, 'rb') as file: #translates the disk page from bin to int and writes it to integerArray
                 integerArray = toIntArray(readBytes(file, page(i)))
-            for k in range (32):
+            for k in range (32): #goes through all of the disk page's 32 pairs, comparing the given values with the ones present
                 if (integerArray[k*2] == x and integerArray[(k*2)+1] == y):
-                    self.searches += i+1
+                    self.searches += i+1 #increments the disk entries by 1 if the value is found
                     return True
-        self.searches += i+1
+            self.searches += i+1 #increments the disk entries by 1 if nothing is found in the disk page and goes onto the next one
+        diskComparisons += self.searches
         return False 
 
     def add(self, x, y):
         if (self.bufferSize() == 64): #when the buffer fills up
-            if (fileIsEmpty()):
+            if (fileIsEmpty()): #if the file is empty, the first diskpage is made
                 self.head = 0
                 self.tail = 0
-            self.writeToDisk() #data is written to the disk
+            self.writeToDisk() #data is written to the disk 
             self.tucBuffer = [2**19 for i in range(64)] #the buffer is reset
-            self.tail += 1
-        self.tucBuffer[self.bufferSize()] = x
+            self.tail += 1 #and the tail is incremented by 1 accordingly
+        self.tucBuffer[self.bufferSize()] = x #the pair is added to the end of the diskpage
         self.tucBuffer[self.bufferSize()] = y
 
-    def forceWrite(self):
+    def forceWrite(self): #writes whatever is in the buffer (more often than not a few legitimate (x,y) pairs with the rest being (2**19,2**19)) to the file and resets the buffer
         self.writeToDisk() #data is written
         self.tucBuffer = [2**19 for i in range(64)] #buffer reset
 
-    def writeToDisk(self):
-        if (fileIsEmpty()):
-            self.head = 0
-            self.tail = 0
-        bytes = toBytes(self.tucBuffer)
-        with open(myFilename, 'ab') as file:
-            writeBytes(file, bytes, page(self.tail))
+    def writeToDisk(self): #method that writes the buffer's content onto the disk
+        bytes = toBytes(self.tucBuffer) #makes a bytearray off the buffer
+        with open(myFilename, 'ab') as file: #opens the file in append binary mode
+            writeBytes(file, bytes, page(self.tail)) #sticks the new disk page after the last one. since we're in ab mode providing a position for the seek argument is unecessary but it's left there in memorium of the last implementation that ended up not working ~sigh~
 
 def main():
+    
     file = open(myFilename, 'w') #creates the file without risking errors
-    file.close()
+    file.close() #closes the file object
     with open(myFilename, 'r+') as file: #clears the file by setting its size to 0
         file.truncate(0)
-    listoula = Lista()
+    listoula = Lista() #creates a Lista object named listoula
 
     print('~'*5,"Linked List",'~'*5)
-    l = LinkedList()
+    l = LinkedList() #creates a linked list
     elementsInTheLinkedList = [] #creating a list of all the elements in the LL
-    for i in range (0,K): #populating the LL and the disk with K random elements
-        c = random.randrange(0,N)
+    for i in range (0,K): #populating the LL and the disk with K pairs of random numbers
+        c = random.randrange(0,N) #generates random pair
         d = random.randrange(0,N)
-        l.append(c, d)
-        listoula.add(c, d)
-        elementsInTheLinkedList.append(c)
+        l.append(c, d) #adds pair to the linked list
+        listoula.add(c, d) #writes pair to buffer (and eventually on the disk)
+        elementsInTheLinkedList.append(c) #logs the pair so it can be utilized in the necessary search of 100 existing pairs later
         elementsInTheLinkedList.append(d)
-    listoula.forceWrite()
-    hundredRandomElementsInLL = []
-    for i in range(0,100): #searching for 100 random pairs from the LL, this part populates the hundredRandomElementsInLL list with 200 total variables out of the 2*K total found in elementsInTheLinkedList
-        randomIndex = random.randrange(0, int(K/2))
-        hundredRandomElementsInLL.append(elementsInTheLinkedList[int(randomIndex*2)])
-        hundredRandomElementsInLL.append(elementsInTheLinkedList[int(randomIndex*2)+1])
+    listoula.forceWrite() #forces the buffer onto the disk in case K isn't divisible by 32
+    hundredRandomElementsInLL = [] #creates the list that will store the 100 pairs that exist
+    for i in range(0,100): #searching for 100 random pairs from the LL, this part populates the hundredRandomElementsInLL list with 200 total variables out of the 2*K total found in elementsInTheLinkedList list
+        randomIndex = random.randrange(0, K) #creates a random index
+        hundredRandomElementsInLL.append(elementsInTheLinkedList[int(randomIndex*2)]) #grabs the x part of the pair from pair #randomIndex (# read like #5, #21 etc), randomIndex is multiplied by 2, so resulting number is an even number, thus an x value
+        hundredRandomElementsInLL.append(elementsInTheLinkedList[int(randomIndex*2)+1]) #randomIndex*2+1 is always an odd number, thus a y
+    global comparisons
+    global diskComparisons
     for i in range(0,100):#this part does the actual searching
         a = hundredRandomElementsInLL[i*2]
         b = hundredRandomElementsInLL[(i*2)+1]
         l.search(a, b) #search the memory
+        if i == 99:
+            print("Comparisons for 100 successful LL searches (memory):", comparisons)
+            comparisons = 0
         listoula.findValue(a, b) #search the disk
+        if i ==99:
+            print("Disk entries for 100 successful LL searches (disk):", listoula.searches)
+            listoula.searches = 0
+    for i in range(0,100):
         l.search(random.randrange(N,N+100), random.randrange(N,N+100))
-        listoula.findValue(random.randrange(N,N+100), random.randrange(N,N+100))
-    print("LL comparisons:", comparisons)
-
-    print('~'*5,"Hashtable",'~'*5)
+        if i == 99:
+            print("Comparisons for 100 failed LL searches (memory):", comparisons)
+            comparisons = 0
+        listoula.findValue(random.randrange(N+1,N+101), random.randrange(N+1,N+101)) #search for 100 numbers greater than N, which in no way exist in the linked list, either on the disk or the memory
+        if i ==99:
+            print("Disk entries for 100 failed LL searches (disk):", listoula.searches)
+            listoula.searches = 0
+    #print("Comparisons:",comparisons)
+    print('~'*5,"Hashtable",'~'*5) #same search logic as the linked list, explanations will be brief
     HT = HashTable()
     elementsInTheHashTable = []
     for i in range (0,K): #populating the HT with K random elements
@@ -224,12 +239,15 @@ def main():
         hundredRandomElementsInHT.append(elementsInTheHashTable[int(randomIndex*2)+1])
     for i in range(0,100):
         HT.searchNode(hundredRandomElementsInHT[i*2], hundredRandomElementsInHT[(i*2)+1])
+        if i == 99:
+            print("Comparisons for 100 successful HT searches (memory):", comparisons)
+            print("Comparisons for 100 successful HT searches (disk): Null") #placeholder for when B2 is implemented (never lmao)
+            comparisons = 0
         HT.searchNode(random.randrange(N,N+100), random.randrange(N,N+100))
-    print("Total comparisons:", comparisons)
-    print('~'*5,"Disk",'~'*5)
-    diskComparisons = 0
-    diskComparisons += listoula.searches
-    print("Total disk entries:", diskComparisons)
+        if i == 99:
+            print("Comparisons for 100 failed HT searches (memory):", comparisons)
+            comparisons = 0
+    print("Comparisons for 100 failed HT searches (disk): Null")
         
 
 if __name__ == "__main__":
