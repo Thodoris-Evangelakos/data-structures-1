@@ -1,4 +1,4 @@
-##stable 1.0
+##stable 1.1
 ##pretty much deployable :)
 from random import seed
 from random import randint
@@ -108,7 +108,7 @@ def writeBytes(file, bytes, position): #writes bytearray at given position
 	file.seek(position)
 	bytes = file.write(bytes)
 
-def hasSpace(lastDiskPage): #checks if the diskpage has any space left by looking for a 2**19 (number out of bounds for the RNG), if spotted, it returns True, else, returns false
+def hasSpace(lastDiskPage): #checks if the diskpage has any space left by looking for a 2**19 (number out of bounds for the RNG, used to fill up the buffer/diskpage) in a diskpage, if spotted, it returns True, else, returns false
     has_space = False
     with open(myFilename, 'rb') as file:
         bytes = readBytes(file, page(lastDiskPage))
@@ -142,6 +142,17 @@ class Lista: #class for the B1 question
                 return i
         return 64
     
+    def findValue(self, x, y):
+        for i in range(0,self.tail+1):
+            with open(myFilename, 'rb') as file:
+                integerArray = toIntArray(readBytes(file, page(i)))
+            for k in range (32):
+                if (integerArray[k*2] == x and integerArray[(k*2)+1] == y):
+                    self.searches += i+1
+                    return True
+        self.searches += i+1
+        return False 
+
     def add(self, x, y):
         if (self.bufferSize() == 64): #when the buffer fills up
             if (fileIsEmpty()):
@@ -184,13 +195,17 @@ def main():
         elementsInTheLinkedList.append(d)
     listoula.forceWrite()
     hundredRandomElementsInLL = []
-    for i in range(0,100): #searching for 100 random pairs from the LL
+    for i in range(0,100): #searching for 100 random pairs from the LL, this part populates the hundredRandomElementsInLL list with 200 total variables out of the 2*K total found in elementsInTheLinkedList
         randomIndex = random.randrange(0, int(K/2))
         hundredRandomElementsInLL.append(elementsInTheLinkedList[int(randomIndex*2)])
         hundredRandomElementsInLL.append(elementsInTheLinkedList[int(randomIndex*2)+1])
-    for i in range(0,100):
-        l.search(hundredRandomElementsInLL[i*2], hundredRandomElementsInLL[(i*2)+1])
+    for i in range(0,100):#this part does the actual searching
+        a = hundredRandomElementsInLL[i*2]
+        b = hundredRandomElementsInLL[(i*2)+1]
+        l.search(a, b) #search the memory
+        listoula.findValue(a, b) #search the disk
         l.search(random.randrange(N,N+100), random.randrange(N,N+100))
+        listoula.findValue(random.randrange(N,N+100), random.randrange(N,N+100))
     print("LL comparisons:", comparisons)
 
     print('~'*5,"Hashtable",'~'*5)
@@ -211,6 +226,10 @@ def main():
         HT.searchNode(hundredRandomElementsInHT[i*2], hundredRandomElementsInHT[(i*2)+1])
         HT.searchNode(random.randrange(N,N+100), random.randrange(N,N+100))
     print("Total comparisons:", comparisons)
+    print('~'*5,"Disk",'~'*5)
+    diskComparisons = 0
+    diskComparisons += listoula.searches
+    print("Total disk entries:", diskComparisons)
         
 
 if __name__ == "__main__":
